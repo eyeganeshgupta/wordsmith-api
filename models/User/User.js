@@ -1,31 +1,37 @@
 const mongoose = require("mongoose");
 
+// User Schema
 const userSchema = new mongoose.Schema(
   {
+    // 1. Basic User Information
     username: {
       type: String,
       required: [true, "Username is required"],
       trim: true,
-      minlength: [2, "Username must be at least 2 characters"],
+      minlength: [2, "Username must be at least 2 characters long"],
       maxlength: [30, "Username cannot exceed 30 characters"],
       unique: true,
     },
-    profilePicture: {
-      type: Object,
-      default: null,
-    },
     email: {
       type: String,
+      required: [true, "Email is required"],
       trim: true,
       lowercase: true,
       match: [/.+@.+\..+/, "Please enter a valid email address"],
       unique: true,
-      sparse: true, // Ensures uniqueness but allows null values
+      sparse: true, // Allows uniqueness with possible null values
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+      required: true,
     },
     password: {
       type: String,
-      minlength: [6, "Password must be at least 6 characters"],
-      select: false, // Excludes the password field from queries unless explicitly selected
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters long"],
+      select: false, // Excludes password from query results unless explicitly selected
     },
     googleId: {
       type: String,
@@ -38,6 +44,85 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: "local",
     },
+
+    // 2. Profile Details
+    profilePicture: {
+      type: Object,
+      default: null,
+    },
+    coverImage: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Bio cannot exceed 500 characters"],
+    },
+    location: {
+      type: String,
+      trim: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "prefer not to say", "non-binary"],
+      default: "prefer not to say",
+    },
+
+    // 3. Account Status
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    accountLevel: {
+      type: String,
+      enum: ["bronze", "silver", "gold"],
+      default: "bronze",
+    },
+
+    // 4. Interactions
+    profileViewers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    posts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    likedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+
+    // 5. Security & Authentication
     passwordResetToken: {
       type: String,
       default: null,
@@ -54,24 +139,20 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
+
+    // 6. Notification Settings
+    notificationType: {
+      email: { type: String },
     },
-    lastLogin: { type: Date, default: Date.now },
-    // User relationships
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
-  { timestamps: true }
+  {
+    timestamps: true, // 7. Timestamps
+  }
 );
 
-// Indexing for better query performance
+// 8. Indexes
 userSchema.index({ username: 1 });
 userSchema.index({ email: 1 }, { unique: true, sparse: true });
 userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);
