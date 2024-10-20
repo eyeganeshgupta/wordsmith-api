@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema(
   {
-    categoryName: {
+    name: {
       type: String,
       required: [true, "Category name is required"],
       trim: true,
@@ -22,6 +22,10 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       maxlength: [200, "Description cannot exceed 200 characters"],
       set: (value) => value.trim(),
+    },
+    shares: {
+      type: Number,
+      default: 0,
     },
     posts: [
       {
