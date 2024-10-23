@@ -1,56 +1,68 @@
 const mongoose = require("mongoose");
 
-// Post Schema
 const postSchema = new mongoose.Schema(
   {
+    // 📝 Post Content
     title: {
       type: String,
       required: [true, "Title is required"],
       trim: true,
-      minlength: [3, "Title must be at least 3 characters long"],
-      maxlength: [100, "Title cannot exceed 100 characters"],
+      minlength: [1, "Title must be at least 1 characters long"],
+      maxlength: [200, "Title cannot exceed 200 characters"],
     },
     description: {
       type: String,
       required: [true, "Description is required"],
       trim: true,
-      minlength: [10, "Description must be at least 10 characters long"],
+      minlength: [3, "Description must be at least 3 characters long"],
     },
     image: {
       type: Object,
-      default: null,
+      validate: {
+        validator: function (v) {
+          return v && v.url && typeof v.url === "string"; // Ensuring image object has a URL property
+        },
+        message: "Image must have a valid URL",
+      },
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "Author is required"],
+      index: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: [true, "Category is required"],
+      index: true,
     },
-    claps: {
+
+    // 💰 Financial Data
+    nextEarningDate: {
+      type: Date,
+      default: () =>
+        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // Default to the first day of the next month
+    },
+    thisMonthEarnings: {
       type: Number,
       default: 0,
-      min: [0, "Claps count cannot be negative"],
+      min: [0, "Earnings cannot be negative"],
     },
-    shares: {
+    totalEarnings: {
       type: Number,
       default: 0,
-      min: [0, "Shares count cannot be negative"],
+      min: [0, "Total earnings cannot be negative"],
     },
+
+    // 📊 Metrics
     viewsCount: {
       type: Number,
       default: 0,
       min: [0, "Views count cannot be negative"],
     },
-    postViews: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+
+    // 👍 Interactions
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -63,29 +75,35 @@ const postSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    viewers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    // 💬 Comments
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment",
       },
     ],
-    scheduledPublishDate: {
-      type: Date,
-      default: null, // To allow scheduling posts for future publication
-    },
+
+    // 🚫 Moderation
     isBlocked: {
       type: Boolean,
-      default: false, // Flag for moderation purposes
+      default: false,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Indexes for better query performance
-postSchema.index({ title: 1, author: 1 }); // Efficient querying by title and author
-postSchema.index({ category: 1, viewsCount: -1 }); // Fetch popular posts by category
-postSchema.index({ likes: 1 }); // For efficiently retrieving posts with many likes
+// 🔍 Indexing
+postSchema.index({ likes: 1 });
+postSchema.index({ dislikes: 1 });
+postSchema.index({ viewers: 1 });
 
-module.exports = mongoose.model("Post", postSchema);
+const Post = mongoose.model("Post", postSchema);
+
+module.exports = Post;
