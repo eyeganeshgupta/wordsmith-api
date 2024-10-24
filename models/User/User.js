@@ -1,42 +1,42 @@
 const mongoose = require("mongoose");
 
-// User Schema
+// 👤 Define the user schema
 const userSchema = new mongoose.Schema(
   {
-    // 1. Basic User Information
+    // 📋 Basic user information
     username: {
       type: String,
-      required: [true, "Username is required"],
+      required: true,
       trim: true,
-      minlength: [2, "Username must be at least 2 characters long"],
-      maxlength: [30, "Username cannot exceed 30 characters"],
-      unique: true,
+      minlength: 1,
+      maxlength: 40,
+      unique: true, // Ensure the username is unique
+      index: true, // Add an index for performance
+    },
+    profilePicture: {
+      type: Object,
+      default: null,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: false, // Optional email field
       trim: true,
       lowercase: true,
-      match: [/.+@.+\..+/, "Please enter a valid email address"],
       unique: true,
-      sparse: true, // Allows uniqueness with possible null values
-    },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-      required: true,
+      sparse: true, // Allow multiple users without an email
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email validation regex
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters long"],
-      select: false, // Excludes password from query results unless explicitly selected
+      required: function () {
+        return this.authMethod === "local"; // Password is required for local auth
+      },
+      select: false, // Do not return password field when querying users
     },
     googleId: {
       type: String,
-      unique: true,
-      sparse: true, // Ensures uniqueness but allows null values for non-Google users
+      unique: true, // Ensure Google ID is unique
+      sparse: true, // Allow users without Google ID
     },
     authMethod: {
       type: String,
@@ -45,84 +45,7 @@ const userSchema = new mongoose.Schema(
       default: "local",
     },
 
-    // 2. Profile Details
-    profilePicture: {
-      type: Object,
-      default: null,
-    },
-    coverImage: {
-      type: String,
-      default: "",
-    },
-    bio: {
-      type: String,
-      trim: true,
-      maxlength: [500, "Bio cannot exceed 500 characters"],
-    },
-    location: {
-      type: String,
-      trim: true,
-    },
-    gender: {
-      type: String,
-      enum: ["male", "female", "prefer not to say", "non-binary"],
-      default: "prefer not to say",
-    },
-
-    // 3. Account Status
-    lastLogin: {
-      type: Date,
-      default: Date.now,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    accountLevel: {
-      type: String,
-      enum: ["bronze", "silver", "gold"],
-      default: "bronze",
-    },
-
-    // 4. Interactions
-    profileViewers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    blockedUsers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    posts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
-    likedPosts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
-
-    // 5. Security & Authentication
+    // 🔐 Security-related fields
     passwordResetToken: {
       type: String,
       default: null,
@@ -140,19 +63,80 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    // 6. Notification Settings
-    notificationType: {
-      email: { type: String },
+    // 🔑 Account-related fields
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
+
+    // 🤝 User relationships
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    // 📝 Posts and 💳 Payments
+    posts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    payments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Payment",
+      },
+    ],
+
+    // 💰 Earnings and 📊 Plan
+    totalEarnings: {
+      type: Number,
+      default: 0,
+    },
+    nextEarningDate: {
+      type: Date,
+      default: () =>
+        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // First day of next month
+    },
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    },
+    hasSelectedPlan: {
+      type: Boolean,
+      default: false,
     },
   },
   {
-    timestamps: true, // 7. Timestamps
+    timestamps: true,
   }
 );
 
-// 8. Indexes
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 }, { unique: true, sparse: true });
-userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
+// 🔍 Indexes
+userSchema.index(
+  {
+    email: 1,
+    googleId: 1,
+  },
+  {
+    unique: true,
+    sparse: true,
+  }
+); // Index for performance on email or googleId
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
