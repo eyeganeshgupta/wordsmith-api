@@ -2,35 +2,22 @@
 
 const express = require("express");
 const dotenv = require("dotenv");
-const winston = require("winston");
+const logger = require("./config/logger");
 const Post = require("./models/Post/Post");
+const dbConnect = require("./config/dbConnect");
 
 dotenv.config();
+dbConnect();
 
 const app = express();
 
+// * Middleware's
 app.use(express.json());
 
-// Initialized a logger using Winston for consistent logging practices
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-    })
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "server.log" }),
-  ],
-});
-
-// ! Create post
+// Create post route
 app.post("/api/v1/posts/create", async (request, response) => {
   try {
     const { title, content } = request.body;
-
     const postCreated = await Post.create({ title, content });
 
     return response.status(201).json({
@@ -58,7 +45,7 @@ const startServer = () => {
     });
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`);
-    process.exit(1); // Exit with a failure code
+    process.exit(1);
   }
 };
 
