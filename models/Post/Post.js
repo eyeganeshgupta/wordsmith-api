@@ -24,11 +24,12 @@ const postSchema = new mongoose.Schema(
         },
         message: "Image must have a valid URL",
       },
+      required: false,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Author is required"],
+      // required: [true, "Author is required"],
       index: true,
     },
     category: {
