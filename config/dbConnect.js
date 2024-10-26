@@ -1,4 +1,4 @@
-const logger = require("./config/logger");
+const logger = require("./logger");
 const mongoose = require("mongoose");
 
 const dbConnect = async () => {
