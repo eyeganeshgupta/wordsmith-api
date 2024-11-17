@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const logger = require("../../config/logger");
 const User = require("../../models/User/User");
+const generateToken = require("../../utils/generateToken");
 
 // @desc Register a new User
 // @route POST /api/v1/users/register
@@ -104,8 +105,6 @@ const loginUserCtrl = async (request, response) => {
     userFound.lastLogin = new Date();
     await userFound.save();
 
-    // Generate a JWT token
-
     // Respond with success message and token
     return response.status(200).json({
       status: "success",
@@ -114,8 +113,11 @@ const loginUserCtrl = async (request, response) => {
         _id: userFound._id,
         username: userFound.username,
         email: userFound.email,
+        role: userFound?.role,
         lastLogin: userFound.lastLogin,
       },
+      // Generate a JWT token
+      token: generateToken(userFound),
     });
   } catch (error) {
     logger.error(`Error in logging the user: ${error.message}`);
