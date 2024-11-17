@@ -65,6 +65,71 @@ const registerUserCtrl = async (request, response) => {
   }
 };
 
+// @desc Login user
+// @route POST /api/v1/users/login
+// @access public
+const loginUserCtrl = async (request, response) => {
+  const { username, password } = request.body;
+
+  // Input validation
+  if (!username || !password) {
+    return response.status(400).json({
+      status: "fail",
+      message: "Username and password are required.",
+    });
+  }
+
+  try {
+    // Finding the user by username
+    const userFound = await User.findOne({ username });
+
+    // Checking if user exists
+    if (!userFound) {
+      return response.status(401).json({
+        status: "fail",
+        message: "Invalid login credentials.",
+      });
+    }
+
+    // Comparing the provided password with the stored hashed password
+    const isMatched = await bcrypt.compare(password, userFound.password);
+    if (!isMatched) {
+      return response.status(401).json({
+        status: "fail",
+        message: "Invalid login credentials.",
+      });
+    }
+
+    // Update last login timestamp
+    userFound.lastLogin = new Date();
+    await userFound.save();
+
+    // Generate a JWT token
+
+    // Respond with success message and token
+    return response.status(200).json({
+      status: "success",
+      message: "User logged in successfully.",
+      data: {
+        _id: userFound._id,
+        username: userFound.username,
+        email: userFound.email,
+        lastLogin: userFound.lastLogin,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error in logging the user: ${error.message}`);
+
+    return response.status(500).json({
+      status: "error",
+      message:
+        "An unexpected error occurred while processing your request. Please try again later.",
+      error: process.env.NODE_ENV === "production" ? undefined : error.message, // Hiding error details in production
+    });
+  }
+};
+
 module.exports = {
   registerUserCtrl,
+  loginUserCtrl,
 };
