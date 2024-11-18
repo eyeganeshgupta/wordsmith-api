@@ -132,9 +132,47 @@ const loginUserCtrl = async (request, response) => {
 };
 
 // @desc Get user profile
-// @route POST /api/v1/users/profile/:id
+// @route GET /api/v1/users/profile
 // @access private
-const getUserProfileCtrl = async (request, response) => {};
+const getUserProfileCtrl = async (request, response) => {
+  const userId = request.userAuth?._id;
+
+  // Check if userId is present
+  if (!userId) {
+    return response.status(401).json({
+      status: "fail",
+      message: "Unauthorized access. User ID is required.",
+    });
+  }
+
+  try {
+    const userProfile = await User.findById(userId);
+
+    // Check if the user profile exists
+    if (!userProfile) {
+      return response.status(404).json({
+        status: "fail",
+        message: "User profile not found.",
+      });
+    }
+
+    // Respond with the user profile data
+    return response.status(200).json({
+      status: "success",
+      message: "User profile retrieved successfully.",
+      data: userProfile,
+    });
+  } catch (error) {
+    logger.error(`Error in retrieving user profile: ${error.message}`);
+
+    return response.status(500).json({
+      status: "error",
+      message:
+        "An unexpected error occurred while processing your request. Please try again later.",
+      error: process.env.NODE_ENV === "production" ? undefined : error.message,
+    });
+  }
+};
 
 module.exports = {
   registerUserCtrl,
