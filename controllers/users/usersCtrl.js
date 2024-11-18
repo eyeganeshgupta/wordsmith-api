@@ -131,7 +131,13 @@ const loginUserCtrl = async (request, response) => {
   }
 };
 
+// @desc Get user profile
+// @route POST /api/v1/users/profile/:id
+// @access private
+const getUserProfileCtrl = async (request, response) => {};
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
+  getUserProfileCtrl,
 };

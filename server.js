@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json());
 
 // * Routes
-app.use("/", usersRouter);
+app.use("/api/v1/users", usersRouter);
 
 // Use PORT from environment variables or default to 2027
 const PORT = process.env.PORT || 2027;
