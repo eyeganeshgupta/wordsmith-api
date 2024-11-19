@@ -47,7 +47,38 @@ const fetchAllCategoriesCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Update a category
+// @route PUT /api/v1/categories/:id
+// @access private
+const updateCategoryCtrl = asyncHandler(async (request, response) => {
+  const { name } = request.body;
+  const { id } = request.params;
+
+  // Check if the category exists
+  const updatedCategory = await Category.findByIdAndUpdate(
+    id,
+    { name },
+    { new: true, runValidators: true }
+  );
+
+  // If the category was not found, respond with a 404 status
+  if (!updatedCategory) {
+    const error = new Error("Category not found.");
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Respond with success message
+  return response.status(200).json({
+    status: "success",
+    message: "Category updated successfully.",
+    data: updatedCategory,
+  });
+});
+
 module.exports = {
   createCategoryCtrl,
   fetchAllCategoriesCtrl,
+  updateCategoryCtrl,
+  deleteCategoryCtrl,
 };
