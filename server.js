@@ -9,6 +9,7 @@ const {
   notFound,
   globalErrorHandler,
 } = require("./middlewares/globalErrorHandler");
+const categoryRouter = require("./routes/category/categoryRouter");
 
 dotenv.config();
 dbConnect();
@@ -20,6 +21,7 @@ app.use(express.json());
 
 // * Routes
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/categories", categoryRouter);
 
 // * Error Middleware
 app.use(notFound);

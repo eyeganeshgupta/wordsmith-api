@@ -23,7 +23,7 @@ const isLoggedIn = async (request, response, next) => {
     if (!user) {
       return response.status(404).json({
         status: "fail",
-        message: "User not found.",
+        message: "Token expired / invalid, Please login again.",
       });
     }
 
