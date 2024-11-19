@@ -76,6 +76,29 @@ const updateCategoryCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Delete a category
+// @route DELETE /api/v1/categories/:id
+// @access private
+const deleteCategoryCtrl = asyncHandler(async (request, response) => {
+  const id = request.params.id;
+
+  // Check if the category exists
+  const deletedCategory = await Category.findByIdAndDelete(id);
+
+  // If the category was not found, respond with a 404 status
+  if (!deletedCategory) {
+    const error = new Error("Category not found.");
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  return response.status(200).json({
+    status: "success",
+    message: "Category successfully deleted.",
+    data: deletedCategory,
+  });
+});
+
 module.exports = {
   createCategoryCtrl,
   fetchAllCategoriesCtrl,

@@ -18,4 +18,7 @@ categoryRouter.get("/", fetchAllCategoriesCtrl);
 // ! Update Category
 categoryRouter.put("/:id", isLoggedIn, updateCategoryCtrl);
 
+// ! Delete Category
+categoryRouter.delete("/:id", isLoggedIn, deleteCategoryCtrl);
+
 module.exports = categoryRouter;
