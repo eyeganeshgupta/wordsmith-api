@@ -35,6 +35,19 @@ const createCategoryCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Fetch all categories
+// @route GET /api/v1/categories
+// @access public
+const fetchAllCategoriesCtrl = asyncHandler(async (request, response) => {
+  const categories = await Category.find({});
+  response.status(200).json({
+    status: "success",
+    message: "Category successfully fetched",
+    data: categories,
+  });
+});
+
 module.exports = {
   createCategoryCtrl,
+  fetchAllCategoriesCtrl,
 };
