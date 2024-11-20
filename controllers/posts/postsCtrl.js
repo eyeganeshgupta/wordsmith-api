@@ -46,7 +46,7 @@ const createPostCtrl = asyncHandler(async (request, response) => {
 // @route GET /api/v1/posts
 // @access public
 const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
-  const allPosts = await Post.find({}).populate("author");
+  const allPosts = await Post.find({}).populate("author", "comments");
   response.status(200).json({
     status: "success",
     message: "Posts successfully fetched.",

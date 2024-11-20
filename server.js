@@ -11,6 +11,7 @@ const {
 } = require("./middlewares/globalErrorHandler");
 const categoryRouter = require("./routes/category/categoryRouter");
 const postsRouter = require("./routes/posts/postRouter");
+const commentRouter = require("./routes/comments/commentRouter");
 
 dotenv.config();
 dbConnect();
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/posts", postsRouter);
+app.use("/api/v1/comments", commentRouter);
 
 // * Error Middleware
 app.use(notFound);
