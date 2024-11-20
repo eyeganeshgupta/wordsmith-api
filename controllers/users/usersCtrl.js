@@ -187,9 +187,52 @@ const blockUserCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Un-block user
+// @route PUT /api/v1/users/unblock/:userIdToUnblock
+// @access private
+const unblockUserCtrl = asyncHandler(async (request, response) => {
+  const userIdToUnblock = request.params.userIdToUnblock;
+
+  const userToUnblock = await User.findById(userIdToUnblock);
+  if (!userToUnblock) {
+    const error = new Error(`User not found with id: ${userIdToUnblock}`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Find the current user
+  const userIdWhoUnblock = request?.userAuth?._id;
+  const loggedInUser = await User.findById(userIdWhoUnblock);
+
+  // Check if user is blocked before unblocking
+  if (!loggedInUser?.blockedUsers?.includes(userIdToUnblock)) {
+    const error = new Error(`User with id: ${userIdToUnblock} is not blocked.`);
+    error.responseStatusCode = 400;
+    throw error;
+  }
+
+  // remove the user from the current user blocked users array
+  loggedInUser.blockedUsers = loggedInUser?.blockedUsers?.filter((id) => {
+    return id.toString() !== userIdToUnblock.toString();
+  });
+
+  // re-save the current user
+  await loggedInUser.save();
+
+  return response.status(200).json({
+    status: "success",
+    message: "User un-blocked successfully.",
+    data: {
+      userId: userIdToUnblock,
+      unblockedUser: userToUnblock,
+    },
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
   getUserProfileCtrl,
   blockUserCtrl,
+  unblockUserCtrl,
 };
