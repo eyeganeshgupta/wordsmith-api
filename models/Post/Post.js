@@ -1,69 +1,63 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
+// 👤 Define the post schema
 const postSchema = new mongoose.Schema(
   {
-    // 📝 Post Content
+    // 📋 Basic post information
     title: {
       type: String,
-      required: [true, "Title is required"],
+      required: [true, "Title is required."],
       trim: true,
-      minlength: [1, "Title must be at least 1 characters long"],
-      maxlength: [200, "Title cannot exceed 200 characters"],
-    },
-    description: {
-      type: String,
-      required: [true, "Description is required"],
-      trim: true,
-      minlength: [3, "Description must be at least 3 characters long"],
+      minlength: 2,
+      maxlength: 100,
+      unique: true,
+      index: true,
     },
     image: {
-      type: Object,
-      validate: {
-        validator: function (v) {
-          return v && v.url && typeof v.url === "string"; // Ensuring image object has a URL property
-        },
-        message: "Image must have a valid URL",
-      },
+      type: String,
       required: false,
+      validate: {
+        validator: (v) => validator.isURL(v),
+        message: (props) => `${props.value} is not a valid URL!`,
+      },
+    },
+    content: {
+      type: String,
+      required: [true, "Content is required."],
+      trim: true,
+      minlength: 2,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
+      required: [true, "Author is required."],
       ref: "User",
-      // required: [true, "Author is required"],
-      index: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
+      required: [true, "Category is required."],
       ref: "Category",
-      required: [true, "Category is required"],
-      index: true,
     },
 
-    // 💰 Financial Data
-    nextEarningDate: {
-      type: Date,
-      default: () =>
-        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // Default to the first day of the next month
-    },
-    thisMonthEarnings: {
+    // 🔢 Engagement-related fields
+    claps: {
       type: Number,
       default: 0,
-      min: [0, "Earnings cannot be negative"],
+      min: 0,
     },
-    totalEarnings: {
+    shares: {
       type: Number,
       default: 0,
-      min: [0, "Total earnings cannot be negative"],
+      min: 0,
     },
+    postViews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
-    // 📊 Metrics
-    viewsCount: {
-      type: Number,
-      default: 0,
-      min: [0, "Views count cannot be negative"],
-    },
-
-    // 👍 Interactions
+    // 💬 Interaction-related fields
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -76,14 +70,6 @@ const postSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    viewers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-
-    // 💬 Comments
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -91,19 +77,21 @@ const postSchema = new mongoose.Schema(
       },
     ],
 
-    // 🚫 Moderation
-    isBlocked: {
-      type: Boolean,
-      default: false,
+    // 📅 Scheduling-related fields
+    scheduledPublished: {
+      type: Date,
+      default: null,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-// 🔍 Indexing
-postSchema.index({ likes: 1 });
-postSchema.index({ dislikes: 1 });
-postSchema.index({ viewers: 1 });
+// 🔍 Indexes
+postSchema.index({ title: 1 });
+postSchema.index({ author: 1 });
+postSchema.index({ category: 1 });
 
 const Post = mongoose.model("Post", postSchema);
 
