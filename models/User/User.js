@@ -8,116 +8,91 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      minlength: 1,
-      maxlength: 40,
-      unique: true, // Ensure the username is unique
-      index: true, // Add an index for performance
-    },
-    profilePicture: {
-      type: Object,
-      default: null,
     },
     email: {
       type: String,
-      required: false, // Optional email field
+      required: true,
       trim: true,
       lowercase: true,
       unique: true,
       sparse: true, // Allow multiple users without an email
-      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email validation regex
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    },
+    role: {
+      type: String,
+      required: true,
+      enum: ["user", "admin"],
+      default: "user",
     },
     password: {
       type: String,
-      required: function () {
-        return this.authMethod === "local"; // Password is required for local auth
-      },
-      select: false, // Do not return password field when querying users
-    },
-    googleId: {
-      type: String,
-      unique: true, // Ensure Google ID is unique
-      sparse: true, // Allow users without Google ID
-    },
-    authMethod: {
-      type: String,
-      enum: ["google", "local", "facebook", "github"],
       required: true,
-      default: "local",
-    },
-
-    // 🔐 Security-related fields
-    passwordResetToken: {
-      type: String,
-      default: null,
-    },
-    passwordResetExpires: {
-      type: Date,
-      default: null,
-    },
-    accountVerificationToken: {
-      type: String,
-      default: null,
-    },
-    accountVerificationExpires: {
-      type: Date,
-      default: null,
-    },
-
-    // 🔑 Account-related fields
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
+      select: false,
     },
     lastLogin: {
       type: Date,
       default: Date.now,
     },
-
-    // 🤝 User relationships
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-
-    // 📝 Posts and 💳 Payments
-    posts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
-    payments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Payment",
-      },
-    ],
-
-    // 💰 Earnings and 📊 Plan
-    totalEarnings: {
-      type: Number,
-      default: 0,
-    },
-    nextEarningDate: {
-      type: Date,
-      default: () =>
-        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // First day of next month
-    },
-    plan: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Plan",
-    },
-    hasSelectedPlan: {
+    isVerified: {
       type: Boolean,
       default: false,
+    },
+    accountLevel: {
+      type: String,
+      enum: ["bronze", "silver", "gold"],
+      default: "bronze",
+    },
+    profilePicture: {
+      type: String,
+      default: "",
+    },
+    coverImage: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
+    location: {
+      type: String,
+      default: "",
+    },
+    notificationPreferences: {
+      email: { type: String, default: true },
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "prefer not to say", "non-binary"],
+    },
+
+    // 🤝 User relationships
+    profileViewers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    // 📝 User activities
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+    likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+
+    // 🔐 Security-related fields
+    passwordResetToken: {
+      type: String,
+    },
+    passwordResetExpires: {
+      type: Date,
+    },
+    accountVerificationToken: {
+      type: String,
+    },
+    accountVerificationExpires: {
+      type: Date,
     },
   },
   {
@@ -125,18 +100,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// 🔍 Indexes
-userSchema.index(
-  {
-    email: 1,
-    googleId: 1,
-  },
-  {
-    unique: true,
-    sparse: true,
-  }
-); // Index for performance on email or googleId
-
+// Compile schema to model
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

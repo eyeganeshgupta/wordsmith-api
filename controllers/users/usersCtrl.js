@@ -1,6 +1,5 @@
 const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
-const logger = require("../../config/logger");
 const User = require("../../models/User/User");
 const generateToken = require("../../utils/generateToken");
 
@@ -139,8 +138,58 @@ const getUserProfileCtrl = asyncHandler(async (request, response, next) => {
   });
 });
 
+// @desc Block user
+// @route PUT /api/v1/users/block/:userIdToBlock
+// @access private
+const blockUserCtrl = asyncHandler(async (request, response) => {
+  // Find the user to be blocked
+  const { userIdToBlock } = request.params?.userIdToBlock;
+
+  const userToBlock = await User.findById(userIdToBlock);
+
+  if (!userToBlock) {
+    const error = new Error(`User not found with id: ${userIdToBlock}`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  const userIdWhoBlock = request?.userAuth?._id;
+
+  // Check if the user is blocking him/herself
+  if (userIdToBlock.toString() === userIdWhoBlock.toString()) {
+    const error = new Error(`Cannot block yourself`);
+    error.responseStatusCode = 400;
+    throw error;
+  }
+
+  // Find the current user
+  const loggedInUser = await User.findById(userIdWhoBlock);
+
+  // Check if user already blocked
+  if (loggedInUser?.blockedUsers?.includes(userIdToBlock)) {
+    const error = new Error(`User is already blocked`);
+    error.responseStatusCode = 400;
+    throw error;
+  }
+
+  loggedInUser?.blockedUsers?.push(userIdToBlock);
+
+  const blockSuccess = await loggedInUser.save();
+
+  return response.status(200).json({
+    status: "success",
+    message: "User blocked successfully.",
+    data: {
+      blockedUserId: userIdToBlock,
+      blockedUsers: loggedInUser.blockedUsers,
+      updatedLoggedInUser: blockSuccess,
+    },
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
   getUserProfileCtrl,
+  blockUserCtrl,
 };
