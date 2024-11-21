@@ -258,6 +258,72 @@ const profileViewCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Follow a User
+// @route GET /api/v1/users/following/:userIdToFollow
+// @access private
+const followUserController = asyncHandler(async (request, response) => {
+  const currentUserId = request.userAuth?._id;
+  const targetUserId = request.params.userIdToFollow;
+
+  // Prevent following oneself
+  if (currentUserId.toString() === targetUserId.toString()) {
+    const error = new Error(`You are unable to follow your own account.`);
+    error.responseStatusCode = 400;
+    throw error;
+  }
+
+  // Updating the current user's following list
+  const updatedCurrentUser = await User.findByIdAndUpdate(
+    currentUserId,
+    {
+      $addToSet: {
+        following: targetUserId,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  // If the current user does not exist
+  if (!updatedCurrentUser) {
+    const error = new Error(`Current user not found.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Updating the target user's followers list
+  const updatedTargetUser = await User.findByIdAndUpdate(
+    targetUserId,
+    {
+      $addToSet: {
+        followers: currentUserId,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  // If the target user does not exist
+  if (!updatedTargetUser) {
+    const error = new Error(`Target user not found.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  return response.status(200).json({
+    status: "success",
+    message: "You have followed the user successfully!",
+    data: {
+      currentUser: updatedCurrentUser,
+      targetUser: updatedTargetUser,
+    },
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -265,4 +331,5 @@ module.exports = {
   blockUserCtrl,
   unblockUserCtrl,
   profileViewCtrl,
+  followingUserCtrl,
 };

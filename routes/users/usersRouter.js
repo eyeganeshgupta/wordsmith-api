@@ -6,22 +6,31 @@ const {
   blockUserCtrl,
   unblockUserCtrl,
   profileViewCtrl,
+  followingUserCtrl,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 
 const usersRouter = express.Router();
 
-// ! Register
+// ! User Registration - Create a new account for a user
 usersRouter.post("/register", registerUserCtrl);
-// ! Login
+
+// ! User Login - Authenticate a user and grant access
 usersRouter.post("/login", loginUserCtrl);
-// ! Get Profile
+
+// ! Get User Profile - Retrieve the logged-in user's profile information
 usersRouter.get("/profile", isLoggedIn, getUserProfileCtrl);
-// ! Block User
+
+// ! Block User - Prevent a specific user from interacting with you
 usersRouter.put("/block/:userIdToBlock", isLoggedIn, blockUserCtrl);
-// ! Un-block User
+
+// ! Unblock User - Allow a previously blocked user to interact with you again
 usersRouter.put("/unblock/:userIdToUnblock", isLoggedIn, unblockUserCtrl);
-// ! Profile view
+
+// ! Profile Viewer - View another user's profile details
 usersRouter.get("/profile-viewer/:userProfileId", isLoggedIn, profileViewCtrl);
+
+// ! Follow User - Start following another user to see their updates
+usersRouter.get("/following/:userIdToFollow", isLoggedIn, followingUserCtrl);
 
 module.exports = usersRouter;
