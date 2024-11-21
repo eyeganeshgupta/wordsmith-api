@@ -229,10 +229,40 @@ const unblockUserCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Who view my profile
+// @route GET /api/v1/users/profile-viewer/:userProfileId
+// @access private
+const profileViewCtrl = asyncHandler(async (request, response) => {
+  const userProfileId = request.params.userProfileId;
+
+  const userProfile = await User.findById(userProfileId);
+  if (!userProfile) {
+    const error = new Error(`User not found with id: ${userIdToBlock}`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  const loggedInUserId = request?.userAuth?._id;
+
+  if (!userProfile?.profileViewers?.includes(loggedInUserId)) {
+    userProfile.profileViewers.push(loggedInUserId);
+    await userProfile.save();
+  }
+
+  return response.status(200).json({
+    status: "success",
+    message: "Profile view recorded successfully.",
+    data: {
+      profileViewers: userProfile.profileViewers,
+    },
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
   getUserProfileCtrl,
   blockUserCtrl,
   unblockUserCtrl,
+  profileViewCtrl,
 };

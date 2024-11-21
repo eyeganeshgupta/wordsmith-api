@@ -5,6 +5,7 @@ const {
   getUserProfileCtrl,
   blockUserCtrl,
   unblockUserCtrl,
+  profileViewCtrl,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 
@@ -20,5 +21,7 @@ usersRouter.get("/profile", isLoggedIn, getUserProfileCtrl);
 usersRouter.put("/block/:userIdToBlock", isLoggedIn, blockUserCtrl);
 // ! Un-block User
 usersRouter.put("/unblock/:userIdToUnblock", isLoggedIn, unblockUserCtrl);
+// ! Profile view
+usersRouter.get("/profile-viewer/:userProfileId", isLoggedIn, profileViewCtrl);
 
 module.exports = usersRouter;
