@@ -6,7 +6,8 @@ const {
   blockUserCtrl,
   unblockUserCtrl,
   profileViewCtrl,
-  followingUserCtrl,
+  followUserCtrl,
+  unfollowUserCtrl,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 
@@ -31,6 +32,9 @@ usersRouter.put("/unblock/:userIdToUnblock", isLoggedIn, unblockUserCtrl);
 usersRouter.get("/profile-viewer/:userProfileId", isLoggedIn, profileViewCtrl);
 
 // ! Follow User - Start following another user to see their updates
-usersRouter.get("/following/:userIdToFollow", isLoggedIn, followingUserCtrl);
+usersRouter.put("/following/:userIdToFollow", isLoggedIn, followUserCtrl);
+
+// ! UnFollow User
+usersRouter.put("/unfollowing/:userIdToUnfollow", isLoggedIn, unfollowUserCtrl);
 
 module.exports = usersRouter;
