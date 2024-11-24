@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const User = require("../../models/User/User");
 const generateToken = require("../../utils/generateToken");
+const sendPasswordResetEmail = require("../../utils/sendEmail");
 
 // @desc Register a new User
 // @route POST /api/v1/users/register
@@ -327,9 +328,9 @@ const followUserCtrl = asyncHandler(async (request, response) => {
 // @desc Un-Follow a User
 // @route PUT /api/v1/users/unfollowing/:userIdToUnfollow
 // @access private
-const unfollowUserCtrl = asyncHandler(async (req, res) => {
-  const currentUserId = req.userAuth?._id;
-  const targetUserId = req.params.userIdToUnfollow;
+const unfollowUserCtrl = asyncHandler(async (request, response) => {
+  const currentUserId = request.userAuth?._id;
+  const targetUserId = request.params.userIdToUnfollow;
 
   // Prevent unfollowing oneself
   if (currentUserId.toString() === targetUserId.toString()) {
@@ -380,13 +381,39 @@ const unfollowUserCtrl = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  return res.status(200).json({
+  return response.status(200).json({
     status: "success",
     message: "You have un-followed the user successfully!",
     data: {
       currentUser: updatedCurrentUser,
       targetUser: updatedTargetUser,
     },
+  });
+});
+
+// @desc Forgot Password
+// @route POST /api/v1/users/forgot-password
+// @access public
+const forgotPasswordCtrl = asyncHandler(async (request, response) => {
+  const { email } = request.body;
+
+  const userFound = await User.findOne({ email });
+
+  if (!userFound) {
+    const error = new Error(`No account associated with this email address.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  const resetToken = await userFound?.generatePasswordResetToken();
+
+  await userFound.save();
+
+  sendPasswordResetEmail(email, resetToken);
+
+  response.status(200).json({
+    status: "success",
+    message: "A password reset email has been sent to your email address.",
   });
 });
 
@@ -399,4 +426,5 @@ module.exports = {
   profileViewCtrl,
   followUserCtrl,
   unfollowUserCtrl,
+  forgotPasswordCtrl,
 };
