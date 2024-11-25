@@ -415,6 +415,9 @@ const forgotPasswordCtrl = asyncHandler(async (request, response) => {
   response.status(200).json({
     status: "success",
     message: "A password reset email has been sent to your email address.",
+    data: {
+      resetToken,
+    },
   });
 });
 
@@ -425,18 +428,40 @@ const resetPasswordCtrl = asyncHandler(async (request, response) => {
   const { resetToken } = request.params;
   const { password } = request.body;
 
+  // Hashing the provided reset token to compare with the stored token
   const cryptoToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
 
+  // Finding the user by matching the hashed token and checking if the token is still valid
   const userFound = await User.findOne({
     passwordResetToken: cryptoToken,
+    passwordResetExpires: {
+      $gt: Date.now(),
+    },
   });
 
-  response.status(201).json({
+  if (!userFound) {
+    const error = new Error(`Password reset token is invalid or has expired.`);
+    error.responseStatusCode = 401;
+    throw error;
+  }
+
+  // Generate a salt and hash the new password
+  const salt = await bcrypt.genSalt(10);
+  userFound.password = await bcrypt.hash(password, salt);
+
+  // Clear the password reset token and expiration fields
+  userFound.passwordResetExpires = undefined;
+  userFound.passwordResetToken = undefined;
+
+  // Save the updated user information
+  await userFound.save();
+
+  response.status(200).json({
     status: "success",
-    message: "Password reset successfully!",
+    message: "Password has been reset successfully!",
   });
 });
 
@@ -450,4 +475,5 @@ module.exports = {
   followUserCtrl,
   unfollowUserCtrl,
   forgotPasswordCtrl,
+  resetPasswordCtrl,
 };
