@@ -466,7 +466,7 @@ const resetPasswordCtrl = asyncHandler(async (request, response) => {
   });
 });
 
-// @route   POST /api/v1/users/account-verification-email/
+// @route   PUT /api/v1/users/account-verification-email/
 // @desc    Send account verification email
 // @access  Private
 const accountVerificationEmailCtrl = asyncHandler(async (request, response) => {
@@ -495,6 +495,47 @@ const accountVerificationEmailCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @route   PUT /api/v1/users/verify-account/:verifyToken
+// @desc    Verify account token
+// @access  Private
+const verifyAccountCtrl = asyncHandler(async (request, response) => {
+  // Extract the verification token from the request parameters
+  const { verifyToken } = request.params;
+
+  // Convert the token to a hashed format that matches the stored token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(verifyToken)
+    .digest("hex");
+
+  // Find the user by the hashed token and check if the token has not expired
+  const user = await User.findOne({
+    accountVerificationToken: hashedToken,
+    accountVerificationExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    const error = new Error(
+      `Account verification token is invalid or has expired.`
+    );
+    error.responseStatusCode = 400;
+    throw error;
+  }
+
+  // Update user account verification status
+  user.isVerified = true;
+  user.accountVerificationExpires = undefined;
+  user.accountVerificationToken = undefined;
+
+  // Save the updated user information
+  await user.save();
+
+  return response.status(200).json({
+    status: "success",
+    message: "Account successfully verified.",
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -507,4 +548,5 @@ module.exports = {
   forgotPasswordCtrl,
   resetPasswordCtrl,
   accountVerificationEmailCtrl,
+  verifyAccountCtrl,
 };

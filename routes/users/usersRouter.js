@@ -11,6 +11,7 @@ const {
   forgotPasswordCtrl,
   resetPasswordCtrl,
   accountVerificationEmailCtrl,
+  verifyAccountCtrl,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 
@@ -52,5 +53,8 @@ usersRouter.put(
   isLoggedIn,
   accountVerificationEmailCtrl
 );
+
+// ! Verify account token
+usersRouter.put("/verify-account/:verifyToken", isLoggedIn, verifyAccountCtrl);
 
 module.exports = usersRouter;
