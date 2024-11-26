@@ -10,6 +10,7 @@ const {
   unfollowUserCtrl,
   forgotPasswordCtrl,
   resetPasswordCtrl,
+  accountVerificationEmailCtrl,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 
@@ -36,13 +37,20 @@ usersRouter.get("/profile-viewer/:userProfileId", isLoggedIn, profileViewCtrl);
 // ! Follow User - Start following another user to see their updates
 usersRouter.put("/following/:userIdToFollow", isLoggedIn, followUserCtrl);
 
-// ! UnFollow User
+// ! Unfollow User - Stop following a user to no longer see their updates
 usersRouter.put("/unfollowing/:userIdToUnfollow", isLoggedIn, unfollowUserCtrl);
 
-// ! Forgot Password
+// ! Forgot Password - Initiate the password recovery process
 usersRouter.post("/forgot-password", forgotPasswordCtrl);
 
-// ! Reset Password
+// ! Reset Password - Update the user's password using a reset token
 usersRouter.post("/reset-password/:resetToken", resetPasswordCtrl);
+
+// ! Send Account Verification Email - send verification email to the logged-in user
+usersRouter.put(
+  "/account-verification-email",
+  isLoggedIn,
+  accountVerificationEmailCtrl
+);
 
 module.exports = usersRouter;

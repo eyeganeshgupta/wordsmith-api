@@ -119,6 +119,25 @@ userSchema.methods.generatePasswordResetToken = function () {
   return resetToken;
 };
 
+// Method to generate a token for account verification
+userSchema.methods.generateAccountVerificationToken = function () {
+  // Generate a random verification token using 20 bytes of cryptographically strong random data
+  const verificationToken = crypto.randomBytes(20).toString("hex");
+
+  // Hash the verification token using SHA-256 and store it in the accountVerificationToken field
+  // This ensures that the actual token is not stored in the database for security reasons
+  this.accountVerificationToken = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+
+  // Set the expiration time for the account verification token to 10 minutes from now
+  this.accountVerificationExpires = Date.now() + 10 * 60 * 1000;
+
+  // Return the plain verification token to be sent to the user via email or other means
+  return verificationToken;
+};
+
 // Compile schema to model
 const User = mongoose.model("User", userSchema);
 

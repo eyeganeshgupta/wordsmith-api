@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../../models/User/User");
 const generateToken = require("../../utils/generateToken");
 const sendPasswordResetEmail = require("../../utils/sendEmail");
+const sendAccountVerificationEmail = require("../../utils/sendAccountVerificationEmail");
 
 // @desc Register a new User
 // @route POST /api/v1/users/register
@@ -465,6 +466,35 @@ const resetPasswordCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @route   POST /api/v1/users/account-verification-email/
+// @desc    Send account verification email
+// @access  Private
+const accountVerificationEmailCtrl = asyncHandler(async (request, response) => {
+  // Retrieve the authenticated user's email
+  const userFound = await User.findById(request?.userAuth?._id);
+
+  if (!userFound) {
+    const error = new Error("User not found.");
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Generate the verification token
+  const verificationToken = await userFound.generateAccountVerificationToken();
+
+  // Save the user with the new token
+  await userFound.save();
+
+  // Send the verification email
+  sendAccountVerificationEmail(userFound?.email, verificationToken);
+
+  // Respond with success
+  return response.status(200).json({
+    status: "success",
+    message: `Verification email sent successfully to ${userFound?.email}.`,
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -476,4 +506,5 @@ module.exports = {
   unfollowUserCtrl,
   forgotPasswordCtrl,
   resetPasswordCtrl,
+  accountVerificationEmailCtrl,
 };
