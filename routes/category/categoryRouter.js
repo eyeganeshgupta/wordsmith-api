@@ -6,11 +6,12 @@ const {
   deleteCategoryCtrl,
 } = require("../../controllers/categories/categoryCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
+const isAccountVerified = require("../../middlewares/isAccountVerified");
 
 const categoryRouter = express.Router();
 
 // ! Create Category
-categoryRouter.post("/", isLoggedIn, createCategoryCtrl);
+categoryRouter.post("/", isLoggedIn, isAccountVerified, createCategoryCtrl);
 
 // ! Fetch All Categories
 categoryRouter.get("/", fetchAllCategoriesCtrl);

@@ -7,11 +7,12 @@ const {
   updatePostCtrl,
   deletePostCtrl,
 } = require("../../controllers/posts/postsCtrl");
+const isAccountVerified = require("../../middlewares/isAccountVerified");
 
 const postsRouter = express.Router();
 
 // ! Create Post
-postsRouter.post("/", isLoggedIn, createPostCtrl);
+postsRouter.post("/", isLoggedIn, isAccountVerified, createPostCtrl);
 
 // ! Fetch All Posts
 postsRouter.get("/", fetchAllPostsCtrl);

@@ -5,10 +5,16 @@ const {
   updateCommentCtrl,
   deleteCommentCtrl,
 } = require("../../controllers/comments/commentsCtrl");
+const isAccountVerified = require("../../middlewares/isAccountVerified");
 
 const commentRouter = express.Router();
 
-commentRouter.post("/:postId", isLoggedIn, createCommentCtrl);
+commentRouter.post(
+  "/:postId",
+  isLoggedIn,
+  isAccountVerified,
+  createCommentCtrl
+);
 
 commentRouter.put("/:id", isLoggedIn, updateCommentCtrl);
 
