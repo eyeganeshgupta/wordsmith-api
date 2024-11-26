@@ -121,10 +121,53 @@ const deletePostCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc   Like a post
+// @route  PUT /api/v1/posts/likes/:id
+// @access Private
+const likePostCtrl = asyncHandler(async (request, response) => {
+  // Retrieve the post ID from the request parameters
+  const { id: postId } = request.params;
+  // Get the authenticated user's ID
+  const userId = request.userAuth._id;
+
+  // Find the post by ID
+  const post = await Post.findById(postId);
+  if (!post) {
+    const error = new Error(`Post not found.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Add the user to the post's likes if not already liked
+  await Post.findByIdAndUpdate(
+    postId,
+    {
+      $addToSet: { likes: userId },
+    },
+    { new: true }
+  );
+
+  // Remove the user from the dislikes array if present
+  post.dislikes = post.dislikes.filter(
+    (dislike) => dislike.toString() !== userId.toString()
+  );
+
+  // Save the updated post
+  await post.save();
+
+  // Respond with a success message and the updated post
+  return response.status(200).json({
+    status: "success",
+    message: "Post liked successfully.",
+    data: post,
+  });
+});
+
 module.exports = {
   createPostCtrl,
   fetchAllPostsCtrl,
   fetchSinglePostCtrl,
   updatePostCtrl,
   deletePostCtrl,
+  likePostCtrl,
 };

@@ -6,6 +6,7 @@ const {
   fetchAllPostsCtrl,
   updatePostCtrl,
   deletePostCtrl,
+  likePostCtrl,
 } = require("../../controllers/posts/postsCtrl");
 const isAccountVerified = require("../../middlewares/isAccountVerified");
 
@@ -25,5 +26,8 @@ postsRouter.put("/:id", isLoggedIn, updatePostCtrl);
 
 // ! Delete Post
 postsRouter.delete("/:id", isLoggedIn, deletePostCtrl);
+
+// ! Like Post
+postsRouter.put("/:id", isLoggedIn, likePostCtrl);
 
 module.exports = postsRouter;
