@@ -198,13 +198,40 @@ const dislikePostCtrl = asyncHandler(async (request, response) => {
   await post.save();
 
   // Respond with a success message and the updated post
-  return response
-    .status(200)
-    .json({
-      status: "success",
-      message: "Post disliked successfully.",
-      data: post,
-    });
+  return response.status(200).json({
+    status: "success",
+    message: "Post disliked successfully.",
+    data: post,
+  });
+});
+
+// @desc   Clap on a post
+// @route  PUT /api/v1/posts/claps/:id
+// @access Private
+const clapOnPostCtrl = asyncHandler(async (request, response) => {
+  const { id } = request.params;
+
+  // Find the post by ID
+  const post = await Post.findById(id);
+  if (!post) {
+    const error = new Error(`Post not found.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Increment the clap count for the post
+  const updatedPost = await Post.findByIdAndUpdate(
+    id,
+    { $inc: { claps: 1 } },
+    { new: true }
+  );
+
+  // Respond with a success message and the updated post data
+  return response.status(200).json({
+    status: "success",
+    message: "Post clapped successfully.",
+    data: updatedPost,
+  });
 });
 
 module.exports = {
@@ -215,4 +242,5 @@ module.exports = {
   deletePostCtrl,
   likePostCtrl,
   dislikePostCtrl,
+  clapOnPostCtrl,
 };

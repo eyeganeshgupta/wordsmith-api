@@ -8,6 +8,7 @@ const {
   deletePostCtrl,
   likePostCtrl,
   dislikePostCtrl,
+  clapOnPostCtrl,
 } = require("../../controllers/posts/postsCtrl");
 const isAccountVerified = require("../../middlewares/isAccountVerified");
 
@@ -33,5 +34,7 @@ postsRouter.put("/likes/:id", isLoggedIn, likePostCtrl);
 
 // ! Dislike Post - Allows authenticated users to dislike a post by its ID
 postsRouter.put("/dislikes/:id", isLoggedIn, dislikePostCtrl);
+
+postsRouter.put("/claps/:id", isLoggedIn, clapOnPostCtrl);
 
 module.exports = postsRouter;
