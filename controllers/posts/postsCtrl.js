@@ -234,6 +234,60 @@ const clapOnPostCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+//@desc   Schedule a post
+//@route  PUT /api/v1/posts/schedule/:postId
+//@access Private
+const schedulePostCtrl = asyncHandler(async (request, response) => {
+  // Extracting payload and parameters
+  const { scheduledPublish } = request.body;
+  const { postId } = request.params;
+
+  // Validating required fields
+  if (!postId || !scheduledPublish) {
+    const error = new Error(`Post ID and scheduled publish date are required.`);
+    error.responseStatusCode = 400;
+    throw error;
+  }
+
+  // Finding the post by ID
+  const post = await Post.findById(postId);
+  if (!post) {
+    const error = new Error(`Post not found.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Verifying if the user is the author of the post
+  if (post.author.toString() !== request.userAuth._id.toString()) {
+    const error = new Error(
+      `You are only authorized to schedule your own posts.`
+    );
+    error.responseStatusCode = 403;
+    throw error;
+  }
+
+  // Checking if the scheduled publish date is in the past
+  const scheduleDate = new Date(scheduledPublish);
+  const currentDate = new Date();
+  if (scheduleDate < currentDate) {
+    const error = new Error(
+      `The scheduled publish date cannot be in the past.`
+    );
+    error.responseStatusCode = 403;
+    throw error;
+  }
+
+  // Updating the scheduled publish date of the post
+  post.scheduledPublished = scheduledPublish;
+  await post.save();
+
+  return response.status(200).json({
+    status: "success",
+    message: "Post scheduled successfully.",
+    data: post,
+  });
+});
+
 module.exports = {
   createPostCtrl,
   fetchAllPostsCtrl,
@@ -243,4 +297,5 @@ module.exports = {
   likePostCtrl,
   dislikePostCtrl,
   clapOnPostCtrl,
+  schedulePostCtrl,
 };

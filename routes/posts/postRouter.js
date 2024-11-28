@@ -9,6 +9,7 @@ const {
   likePostCtrl,
   dislikePostCtrl,
   clapOnPostCtrl,
+  schedulePostCtrl,
 } = require("../../controllers/posts/postsCtrl");
 const isAccountVerified = require("../../middlewares/isAccountVerified");
 
@@ -36,5 +37,7 @@ postsRouter.put("/likes/:id", isLoggedIn, likePostCtrl);
 postsRouter.put("/dislikes/:id", isLoggedIn, dislikePostCtrl);
 
 postsRouter.put("/claps/:id", isLoggedIn, clapOnPostCtrl);
+
+postsRouter.put("/schedule/:postId", isLoggedIn, schedulePostCtrl);
 
 module.exports = postsRouter;
