@@ -42,15 +42,31 @@ const createPostCtrl = asyncHandler(async (request, response) => {
   });
 });
 
-// @desc Fetch all Posts
+// @desc  Get all posts
 // @route GET /api/v1/posts
-// @access public
-const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
-  const allPosts = await Post.find({}).populate("author", "comments");
+// @access Private
+const fetchAllPostsController = asyncHandler(async (request, response) => {
+  // Find all users who have blocked the logged-in user
+  const loggedInUserId = request.userAuth?._id;
+
+  const usersBlockingLoggedInUser = await User.find({
+    blockedUsers: loggedInUserId,
+  });
+
+  // Extract the IDs of users who have blocked the logged-in user
+  const blockingUserIds = usersBlockingLoggedInUser.map((user) => user._id);
+
+  const posts = await Post.find({
+    author: {
+      $nin: blockingUserIds,
+    },
+  });
+
+  // Send success response
   response.status(200).json({
     status: "success",
     message: "Posts successfully fetched.",
-    data: allPosts,
+    data: posts,
   });
 });
 
