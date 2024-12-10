@@ -56,14 +56,26 @@ const fetchAllPostsController = asyncHandler(async (request, response) => {
   // Extract the IDs of users who have blocked the logged-in user
   const blockingUserIds = usersBlockingLoggedInUser.map((user) => user._id);
 
-  const posts = await Post.find({
+  const currentTime = new Date();
+
+  const query = {
     author: {
       $nin: blockingUserIds,
     },
-  });
+    $or: [
+      {
+        scheduledPublished: {
+          $lte: currentTime,
+        },
+        scheduledPublished: null,
+      },
+    ],
+  };
+
+  const posts = await Post.find(query);
 
   // Send success response
-  response.status(200).json({
+  return response.status(200).json({
     status: "success",
     message: "Posts successfully fetched.",
     data: posts,
