@@ -1,5 +1,6 @@
 const express = require("express");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
+const multer = require("multer");
 const {
   createPostCtrl,
   fetchSinglePostCtrl,
@@ -12,11 +13,20 @@ const {
   schedulePostCtrl,
 } = require("../../controllers/posts/postsCtrl");
 const isAccountVerified = require("../../middlewares/isAccountVerified");
+const storage = require("../../utils/fileUpload");
 
 const postsRouter = express.Router();
 
+const upload = multer({ storage });
+
 // ! Create Post - Allows authenticated and verified users to create a new post
-postsRouter.post("/", isLoggedIn, isAccountVerified, createPostCtrl);
+postsRouter.post(
+  "/",
+  isLoggedIn,
+  isAccountVerified,
+  upload.single("file"),
+  createPostCtrl
+);
 
 // ! Fetch All Posts - Retrieve a list of all posts
 postsRouter.get("/", fetchAllPostsCtrl);

@@ -14,7 +14,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   allowedFormats: ["jpg", "png", "jpeg"], // Restrict file formats to images only
   params: {
-    folder: "wordsmith-api",
+    folder: "wordsmith",
     transformation: [
       {
         width: 500,
