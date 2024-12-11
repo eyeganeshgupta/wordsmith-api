@@ -23,6 +23,7 @@ const createPostCtrl = asyncHandler(async (request, response) => {
     content,
     category: categoryId,
     author: request.userAuth._id,
+    image: request?.file?.path,
   });
 
   // Update the author and category with the new post

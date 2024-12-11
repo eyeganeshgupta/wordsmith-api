@@ -16,7 +16,7 @@ const postSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      required: false,
+      required: true,
       validate: {
         validator: (v) => validator.isURL(v),
         message: (props) => `${props.value} is not a valid URL!`,
