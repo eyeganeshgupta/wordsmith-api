@@ -46,7 +46,7 @@ const createPostCtrl = asyncHandler(async (request, response) => {
 // @desc  Get all posts
 // @route GET /api/v1/posts
 // @access Private
-const fetchAllPostsController = asyncHandler(async (request, response) => {
+const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
   // Find all users who have blocked the logged-in user
   const loggedInUserId = request.userAuth?._id;
 
