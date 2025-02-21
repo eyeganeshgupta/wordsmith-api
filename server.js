@@ -1,6 +1,7 @@
 "use strict";
 
 const express = require("express");
+const cors = require("cors");
 const dotenv = require("dotenv");
 const logger = require("./config/logger");
 const dbConnect = require("./config/dbConnect");
@@ -19,6 +20,7 @@ dbConnect();
 const app = express();
 
 // * Middleware's
+app.use(cors());
 app.use(express.json());
 
 // * Routes
