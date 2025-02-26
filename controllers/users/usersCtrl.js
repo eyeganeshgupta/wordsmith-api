@@ -36,7 +36,6 @@ const registerUserCtrl = asyncHandler(async (request, response) => {
     username,
     email,
     password,
-    profilePicture: request?.file?.path,
   });
 
   // Generate a salt for hashing the password
