@@ -11,6 +11,7 @@ const {
   dislikePostCtrl,
   clapOnPostCtrl,
   schedulePostCtrl,
+  fetchPublicPostCtrl,
 } = require("../../controllers/posts/postsCtrl");
 const isAccountVerified = require("../../middlewares/isAccountVerified");
 const storage = require("../../utils/fileUpload");
@@ -29,10 +30,13 @@ postsRouter.post(
 );
 
 // ! Fetch All Posts - Retrieve a list of all posts
-postsRouter.get("/", fetchAllPostsCtrl);
+postsRouter.get("/", isLoggedIn, fetchAllPostsCtrl);
 
 // ! Fetch Single Post - Retrieve details of a specific post by its ID
 postsRouter.get("/:id", fetchSinglePostCtrl);
+
+// ! Fetch Public Posts - Retrieve a list of latest 4 posts
+postsRouter.get("/public", fetchPublicPostCtrl);
 
 // ! Update Post - Allows authenticated users to update an existing post by its ID
 postsRouter.put("/:id", isLoggedIn, updatePostCtrl);

@@ -104,6 +104,22 @@ const fetchSinglePostCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc  Get public posts
+// @route GET /api/v1/posts/public
+// @access Public
+const fetchPublicPostCtrl = asyncHandler(async (request, response) => {
+  const posts = await Post.find({})
+    .sort({ createdAt: -1 })
+    .limit(4)
+    .populate("category");
+
+  return response.status(200).json({
+    status: "success",
+    message: "Posts successfully fetched.",
+    data: posts,
+  });
+});
+
 // @desc Update a Post
 // @route PUT /api/v1/posts/:id
 // @access private
@@ -321,6 +337,7 @@ module.exports = {
   createPostCtrl,
   fetchAllPostsCtrl,
   fetchSinglePostCtrl,
+  fetchPublicPostCtrl,
   updatePostCtrl,
   deletePostCtrl,
   likePostCtrl,
