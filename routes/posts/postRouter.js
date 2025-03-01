@@ -32,11 +32,11 @@ postsRouter.post(
 // ! Fetch All Posts - Retrieve a list of all posts
 postsRouter.get("/", isLoggedIn, fetchAllPostsCtrl);
 
+// ! Fetch Public Posts - Retrieve a list of latest 4 posts
+postsRouter.get("/public-posts", fetchPublicPostCtrl);
+
 // ! Fetch Single Post - Retrieve details of a specific post by its ID
 postsRouter.get("/:id", fetchSinglePostCtrl);
-
-// ! Fetch Public Posts - Retrieve a list of latest 4 posts
-postsRouter.get("/public", fetchPublicPostCtrl);
 
 // ! Update Post - Allows authenticated users to update an existing post by its ID
 postsRouter.put("/:id", isLoggedIn, updatePostCtrl);
