@@ -16,7 +16,7 @@ const isLoggedIn = async (request, response, next) => {
   try {
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded?.id; // Adjusted to match the decoded structure
+    const userId = decoded?.user?.id; // Adjusted to match the decoded structure
 
     const user = await User.findById(userId).select("username email role _id");
 
