@@ -151,15 +151,29 @@ const updatePostCtrl = asyncHandler(async (request, response) => {
 const deletePostCtrl = asyncHandler(async (request, response) => {
   const { id } = request.params;
 
-  const deletedPost = await Post.findByIdAndDelete(id);
+  const postFound = await Post.findById(id);
 
-  if (!deletedPost) {
+  if (!postFound) {
     const error = new Error(`Post not found with id: ${id}`);
     error.responseStatusCode = 404;
     throw error;
   }
 
-  return response.status(200).json({
+  // Verify if the requesting user is the post's author
+  const isAuthor =
+    request.userAuth?._id?.toString() === postFound.author?._id?.toString();
+
+  if (!isAuthor) {
+    const error = new Error(
+      "Action denied: You are not the creator of this post."
+    );
+    error.responseStatusCode = 403;
+    throw error;
+  }
+
+  const deletedPost = await Post.findByIdAndDelete(id);
+
+  response.status(200).json({
     status: "success",
     message: "Post successfully deleted.",
     data: deletedPost,
