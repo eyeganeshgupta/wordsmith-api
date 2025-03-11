@@ -73,7 +73,9 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
     ],
   };
 
-  const posts = await Post.find(query);
+  const posts = await Post.find(query)
+    .sort({ createdAt: -1 })
+    .populate("category");
 
   // Send success response
   return response.status(200).json({
