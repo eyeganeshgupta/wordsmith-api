@@ -39,7 +39,7 @@ postsRouter.get("/public-posts", fetchPublicPostCtrl);
 postsRouter.get("/:id", fetchSinglePostCtrl);
 
 // ! Update Post - Allows authenticated users to update an existing post by its ID
-postsRouter.put("/:id", isLoggedIn, updatePostCtrl);
+postsRouter.put("/:id", isLoggedIn, upload.single("file"), updatePostCtrl);
 
 // ! Delete Post - Allows authenticated users to delete a post by its ID
 postsRouter.delete("/:id", isLoggedIn, deletePostCtrl);

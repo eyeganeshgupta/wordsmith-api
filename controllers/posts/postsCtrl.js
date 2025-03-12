@@ -128,10 +128,29 @@ const fetchPublicPostCtrl = asyncHandler(async (request, response) => {
 const updatePostCtrl = asyncHandler(async (request, response) => {
   const { id } = request.params;
 
-  const updatedPost = await Post.findByIdAndUpdate(id, request.body, {
-    new: true,
-    runValidators: true,
-  });
+  const postFound = await Post.findById(id);
+
+  if (!postFound) {
+    const error = new Error(`Post not found with id: ${id}`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  const { title, category, content } = request.body;
+
+  const updatedPost = await Post.findByIdAndUpdate(
+    id,
+    {
+      image: request?.file?.path ? request?.file?.path : postFound?.image,
+      title: title ? title : postFound?.title,
+      category: category ? category : postFound?.category,
+      content: content ? content : postFound?.content,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   if (!updatedPost) {
     const error = new Error(`Post not found with id: ${id}`);
