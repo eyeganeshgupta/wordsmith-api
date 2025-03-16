@@ -12,6 +12,7 @@ const {
   clapOnPostCtrl,
   schedulePostCtrl,
   fetchPublicPostCtrl,
+  viewPostCountCtrl,
 } = require("../../controllers/posts/postsCtrl");
 const isAccountVerified = require("../../middlewares/isAccountVerified");
 const storage = require("../../utils/fileUpload");
@@ -51,6 +52,8 @@ postsRouter.put("/likes/:id", isLoggedIn, likePostCtrl);
 postsRouter.put("/dislikes/:id", isLoggedIn, dislikePostCtrl);
 
 postsRouter.put("/claps/:id", isLoggedIn, clapOnPostCtrl);
+
+postsRouter.put("/:id/post-view-count", isLoggedIn, viewPostCountCtrl);
 
 postsRouter.put("/schedule/:postId", isLoggedIn, schedulePostCtrl);
 

@@ -138,6 +138,8 @@ const updatePostCtrl = asyncHandler(async (request, response) => {
 
   const { title, category, content } = request.body;
 
+  console.log("category: " + category);
+
   const updatedPost = await Post.findByIdAndUpdate(
     id,
     {
@@ -314,6 +316,43 @@ const clapOnPostCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc   View a post
+// @route  PUT /api/v1/posts/:id/post-views-count
+// @access Private
+const viewPostCountCtrl = asyncHandler(async (request, response) => {
+  // Retrieve the post ID from the request parameters
+  const { id: postId } = request.params;
+  // Get the authenticated user's ID
+  const userId = request.userAuth._id;
+
+  // Find the post by ID
+  const post = await Post.findById(postId);
+  if (!post) {
+    const error = new Error(`Post not found.`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Add the user to the post's likes if not already liked
+  await Post.findByIdAndUpdate(
+    postId,
+    {
+      $addToSet: { postViews: userId },
+    },
+    { new: true }
+  );
+
+  // Save the updated post
+  await post.save();
+
+  // Respond with a success message and the updated post
+  return response.status(200).json({
+    status: "success",
+    message: "Post liked successfully.",
+    data: post,
+  });
+});
+
 //@desc   Schedule a post
 //@route  PUT /api/v1/posts/schedule/:postId
 //@access Private
@@ -378,5 +417,6 @@ module.exports = {
   likePostCtrl,
   dislikePostCtrl,
   clapOnPostCtrl,
+  viewPostCountCtrl,
   schedulePostCtrl,
 };
