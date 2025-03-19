@@ -91,7 +91,17 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
 const fetchSinglePostCtrl = asyncHandler(async (request, response) => {
   const { id } = request.params;
 
-  const post = await Post.findById(id).populate("author").populate("category");
+  const post = await Post.findById(id)
+    .populate("author")
+    .populate("category")
+    .populate({
+      path: "comments",
+      model: "Comment",
+      populate: {
+        path: "author",
+        select: "username",
+      },
+    });
 
   if (!post) {
     const error = new Error(`Post not found with id: ${id}`);
