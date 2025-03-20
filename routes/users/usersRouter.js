@@ -13,6 +13,7 @@ const {
   resetPasswordCtrl,
   accountVerificationEmailCtrl,
   verifyAccountCtrl,
+  getPublicProfileCtrl,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 const storage = require("../../utils/fileUpload");
@@ -60,5 +61,7 @@ usersRouter.put(
 
 // ! Verify account token
 usersRouter.put("/verify-account/:verifyToken", isLoggedIn, verifyAccountCtrl);
+
+usersRouter.get("/public-profile/:userId", isLoggedIn, getPublicProfileCtrl);
 
 module.exports = usersRouter;

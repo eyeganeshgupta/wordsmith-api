@@ -124,7 +124,27 @@ const getUserProfileCtrl = asyncHandler(async (request, response, next) => {
     throw error;
   }
 
-  const userProfile = await User.findById(userId);
+  const userProfile = await User.findById(userId)
+    .populate({
+      path: "posts",
+      model: "Post",
+    })
+    .populate({
+      path: "following",
+      model: "User",
+    })
+    .populate({
+      path: "followers",
+      model: "User",
+    })
+    .populate({
+      path: "blockedUsers",
+      model: "User",
+    })
+    .populate({
+      path: "profileViewers",
+      model: "User",
+    });
 
   // Check if the user profile exists
   if (!userProfile) {
@@ -536,6 +556,36 @@ const verifyAccountCtrl = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc Get user profile
+// @route GET /api/v1/users/public-profile/:userId
+// @access public
+const getPublicProfileCtrl = asyncHandler(async (request, response, next) => {
+  const userId = request.params.userId;
+
+  // Check if userId is present
+  if (!userId) {
+    const error = new Error("Unauthorized access.");
+    error.responseStatusCode = 401;
+    throw error;
+  }
+
+  const userProfile = await User.findById(userId);
+
+  // Check if the user profile exists
+  if (!userProfile) {
+    const error = new Error("User profile not found.");
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  // Respond with the user's profile data
+  return response.status(200).json({
+    status: "success",
+    message: userProfile?.username + " profile retrieved successfully.",
+    data: userProfile,
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -549,4 +599,5 @@ module.exports = {
   resetPasswordCtrl,
   accountVerificationEmailCtrl,
   verifyAccountCtrl,
+  getPublicProfileCtrl,
 };
