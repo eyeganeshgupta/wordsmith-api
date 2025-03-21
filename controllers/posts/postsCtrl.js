@@ -350,7 +350,7 @@ const viewPostCountCtrl = asyncHandler(async (request, response) => {
       $addToSet: { postViews: userId },
     },
     { new: true }
-  );
+  ).populate("author");
 
   // Save the updated post
   await post.save();
