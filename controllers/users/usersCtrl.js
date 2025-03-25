@@ -569,7 +569,9 @@ const getPublicProfileCtrl = asyncHandler(async (request, response, next) => {
     throw error;
   }
 
-  const userProfile = await User.findById(userId);
+  const userProfile = await User.findById(userId)
+    .select("-password")
+    .populate("posts");
 
   // Check if the user profile exists
   if (!userProfile) {
