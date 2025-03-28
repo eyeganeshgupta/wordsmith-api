@@ -571,7 +571,12 @@ const getPublicProfileCtrl = asyncHandler(async (request, response, next) => {
 
   const userProfile = await User.findById(userId)
     .select("-password")
-    .populate("posts");
+    .populate({
+      path: "posts",
+      populate: {
+        path: "category",
+      },
+    });
 
   // Check if the user profile exists
   if (!userProfile) {
