@@ -593,6 +593,48 @@ const getPublicProfileCtrl = asyncHandler(async (request, response, next) => {
   });
 });
 
+// @desc    Upload Profile Picture
+// @route   PUT /api/v1/users/profile-picture
+// @access  Private
+const uploadProfilePicture = asyncHandler(async (request, response) => {
+  try {
+    const userId = request?.userAuth?._id;
+    if (!userId) {
+      return response.status(401).json({
+        status: "fail",
+        message: "Unauthorized access. User not authenticated.",
+      });
+    }
+
+    const userFound = await User.findById(userId);
+
+    if (!userFound) {
+      return response.status(404).json({
+        status: "fail",
+        message: "User not found.",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { profilePicture: request?.file?.path } },
+      { new: true }
+    );
+
+    response.status(200).json({
+      status: "success",
+      message: "User profile picture updated successfully.",
+      data: updatedUser,
+    });
+  } catch (error) {
+    response.status(500).json({
+      status: "error",
+      message: "An error occurred while updating the profile picture.",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -607,4 +649,5 @@ module.exports = {
   accountVerificationEmailCtrl,
   verifyAccountCtrl,
   getPublicProfileCtrl,
+  uploadProfilePicture,
 };

@@ -14,6 +14,7 @@ const {
   accountVerificationEmailCtrl,
   verifyAccountCtrl,
   getPublicProfileCtrl,
+  uploadProfilePicture,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 const storage = require("../../utils/fileUpload");
@@ -63,5 +64,12 @@ usersRouter.put(
 usersRouter.put("/verify-account/:verifyToken", isLoggedIn, verifyAccountCtrl);
 
 usersRouter.get("/public-profile/:userId", isLoggedIn, getPublicProfileCtrl);
+
+usersRouter.put(
+  "/profile-picture",
+  isLoggedIn,
+  upload.single("file"),
+  uploadProfilePicture
+);
 
 module.exports = usersRouter;
