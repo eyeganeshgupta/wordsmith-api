@@ -635,6 +635,41 @@ const uploadProfilePicture = asyncHandler(async (request, response) => {
   }
 });
 
+// @desc    Upload Cover Image
+// @route   PUT /api/v1/users/cover-image
+// @access  Private
+const uploadCoverImage = asyncHandler(async (request, response) => {
+  const userId = request?.userAuth?._id;
+
+  if (!userId) {
+    return response.status(401).json({
+      status: "fail",
+      message: "Unauthorized access. User not authenticated.",
+    });
+  }
+
+  const userFound = await User.findById(userId);
+
+  if (!userFound) {
+    return response.status(404).json({
+      status: "fail",
+      message: "User not found.",
+    });
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: { coverImage: request?.file?.path } },
+    { new: true }
+  );
+
+  response.status(200).json({
+    status: "success",
+    message: "User cover image updated successfully.",
+    data: updatedUser,
+  });
+});
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -650,4 +685,5 @@ module.exports = {
   verifyAccountCtrl,
   getPublicProfileCtrl,
   uploadProfilePicture,
+  uploadCoverImage,
 };

@@ -15,6 +15,7 @@ const {
   verifyAccountCtrl,
   getPublicProfileCtrl,
   uploadProfilePicture,
+  uploadCoverImage,
 } = require("../../controllers/users/usersCtrl");
 const isLoggedIn = require("../../middlewares/isLoggedIn");
 const storage = require("../../utils/fileUpload");
@@ -70,6 +71,13 @@ usersRouter.put(
   isLoggedIn,
   upload.single("file"),
   uploadProfilePicture
+);
+
+usersRouter.put(
+  "/cover-image",
+  isLoggedIn,
+  upload.single("file"),
+  uploadCoverImage
 );
 
 module.exports = usersRouter;
