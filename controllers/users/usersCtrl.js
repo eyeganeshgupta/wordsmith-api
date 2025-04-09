@@ -108,6 +108,7 @@ const loginUserCtrl = asyncHandler(async (request, response) => {
     },
     // Generate a JWT token
     token: generateToken(userFound),
+    profilePicture: userFound?.profilePicture,
   });
 });
 
