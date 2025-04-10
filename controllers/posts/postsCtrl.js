@@ -7,6 +7,21 @@ const Category = require("../../models/Category/Category");
 // @route POST /api/v1/posts
 // @access Private
 const createPostCtrl = asyncHandler(async (request, response) => {
+  // Check if user account is verified
+  const userFound = await User.findById(request?.userAuth?._id);
+
+  if (userFound) {
+    const error = new Error(`User not found`);
+    error.responseStatusCode = 404;
+    throw error;
+  }
+
+  if (!userFound?.isVerified) {
+    const error = new Error(`Action denied your account is not verified`);
+    error.responseStatusCode = 401;
+    throw error;
+  }
+
   const { title, content, categoryId } = request.body;
 
   // Check if the post already exists
