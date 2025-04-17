@@ -672,6 +672,52 @@ const uploadCoverImage = asyncHandler(async (request, response) => {
   });
 });
 
+// @desc    Update username/email
+// @route   PUT /api/v1/users/update-profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (request, response, next) => {
+  try {
+    const userId = request.userAuth?._id;
+
+    if (!userId) {
+      const error = new Error("Unauthorized access. User not authenticated.");
+      error.responseStatusCode = 401;
+      return next(error);
+    }
+
+    const userFound = await User.findById(userId);
+    if (!userFound) {
+      const error = new Error("User not found.");
+      error.responseStatusCode = 404;
+      return next(error);
+    }
+
+    const { username, email } = request.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        email: email || userFound.email,
+        username: username || userFound.username,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    return response.status(200).json({
+      status: "success",
+      message: "User successfully updated.",
+      data: updatedUser,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+module.exports = updateUserProfile;
+
 module.exports = {
   registerUserCtrl,
   loginUserCtrl,
@@ -688,4 +734,5 @@ module.exports = {
   getPublicProfileCtrl,
   uploadProfilePicture,
   uploadCoverImage,
+  updateUserProfile,
 };
