@@ -73,6 +73,7 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
   const blockingUserIds = usersBlockingLoggedInUser.map((user) => user._id);
 
   const category = request?.query?.category;
+  const searchTerm = request?.query?.searchTerm;
 
   const currentTime = new Date();
 
@@ -92,6 +93,13 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
 
   if (category) {
     query.category = category;
+  }
+
+  if (searchTerm) {
+    query.title = {
+      $regex: searchTerm,
+      $options: "i",
+    };
   }
 
   const posts = await Post.find(query)
