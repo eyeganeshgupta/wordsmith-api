@@ -72,9 +72,11 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
   // Extract the IDs of users who have blocked the logged-in user
   const blockingUserIds = usersBlockingLoggedInUser.map((user) => user._id);
 
+  const category = request?.query?.category;
+
   const currentTime = new Date();
 
-  const query = {
+  let query = {
     author: {
       $nin: blockingUserIds,
     },
@@ -87,6 +89,10 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
       },
     ],
   };
+
+  if (category) {
+    query.category = category;
+  }
 
   const posts = await Post.find(query)
     .sort({ createdAt: -1 })
