@@ -102,14 +102,43 @@ const fetchAllPostsCtrl = asyncHandler(async (request, response) => {
     };
   }
 
+  const page = parseInt(request?.query?.page, 10) || 1;
+  const limit = parseInt(request?.query?.limit, 10) || 5;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const total = await Post.countDocuments(query);
+
   const posts = await Post.find(query)
-    .sort({ createdAt: -1 })
-    .populate("category");
+    .populate({
+      path: "author",
+      model: "User",
+      select: "email role username",
+    })
+    .populate("category")
+    .skip(startIndex)
+    .limit(limit);
+
+  const pagination = {};
+
+  if (endIndex < total) {
+    pagination.next = {
+      page: page + 1,
+      limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    pagination.previous = {
+      page: page - 1,
+      limit,
+    };
+  }
 
   // Send success response
   return response.status(200).json({
     status: "success",
     message: "Posts successfully fetched.",
+    pagination,
     data: posts,
   });
 });
